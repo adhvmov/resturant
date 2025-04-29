@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foodie - My Orders</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#1f2937',secondary:'#4b5563'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.card-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Custom dropdown */
+.custom-dropdown {
+  position: relative;
+}
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 180px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.2s ease;
+}
+.dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Status pills */
+.status-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.status-delivered {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: rgb(16, 185, 129);
+}
+.status-processing {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: rgb(59, 130, 246);
+}
+.status-cancelled {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: rgb(239, 68, 68);
+}
+.status-pending {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: rgb(245, 158, 11);
+}
+
+/* Order details modal */
+.order-details-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+.order-details-modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+.order-details-content {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+.order-details-modal.show .order-details-content {
+  transform: translateY(0);
+}
+
+/* Timeline styles */
+.timeline {
+  position: relative;
+  margin-left: 20px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 0;
+  width: 2px;
+  background-color: #e5e7eb;
+}
+.timeline-item {
+  position: relative;
+  padding-left: 30px;
+  padding-bottom: 24px;
+}
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+.timeline-dot {
+  position: absolute;
+  left: -5px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.timeline-dot.active {
+  background-color: #1f2937;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px #1f2937;
+}
+.timeline-dot.completed {
+  background-color: #10b981;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px #10b981;
+}
+.timeline-dot.inactive {
+  background-color: #e5e7eb;
+  border: 2px solid white;
+}
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<!-- Top Navigation -->
+<header class="fixed top-0 left-0 right-0 z-50 glass-effect">
+  <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+    <a href="#" class="font-['Pacifico'] text-2xl text-primary">logo</a>
+    <div class="flex items-center gap-6">
+      <div class="relative w-10 h-10 flex items-center justify-center bg-black rounded-full cursor-pointer">
+        <i class="ri-shopping-cart-line text-white ri-lg"></i>
+        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">3</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="pt-20 pb-24">
+  <div class="container mx-auto px-4">
+    <!-- Page Title -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">My Orders</h1>
+      <p class="text-gray-600">View and manage your orders</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-xl p-4 mb-6 card-shadow">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="custom-dropdown">
+            <button id="dateFilterBtn" class="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-full text-sm font-medium bg-white text-gray-700 whitespace-nowrap">
+              <span>Last 30 days</span>
+              <i class="ri-arrow-down-s-line"></i>
+            </button>
+            <div id="dateFilterMenu" class="dropdown-menu">
+              <div class="py-2">
+                <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-primary font-medium">Last 30 days</button>
+                <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700">Last 6 months</button>
+                <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700">Last year</button>
+                <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700">All time</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="custom-dropdown">
+            <button id="statusFilterBtn" class="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-full text-sm font-medium bg-white text-gray-700 whitespace-nowrap">
+              <span>All orders</span>
+              <i class="ri-arrow-down-s-line"></i>
+            </button>
+            <div id="statusFilterMenu" class="dropdown-menu">
+              <div class="py-2">
+                <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-primary font-medium">All orders</button>
+                <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700">Active</button>
+                <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700">Delivered</button>
+                <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700">Cancelled</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="relative">
+          <input type="text" placeholder="Search orders..." class="w-full md:w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+          <div class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-gray-400">
+            <i class="ri-search-line"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders List -->
+    <div class="space-y-4">
+      <!-- Order 1 - Active -->
+      <div class="bg-white rounded-xl overflow-hidden card-shadow">
+        <div class="p-4 border-b border-gray-100">
+          <div class="flex justify-between items-center mb-2">
+            <div>
+              <span class="text-sm text-gray-500">Order #FD87612</span>
+              <span class="mx-2 text-gray-300">•</span>
+              <span class="text-sm text-gray-500">April 28, 2025</span>
+            </div>
+            <span class="status-pill status-processing">Processing</span>
+          </div>
+          <h3 class="font-bold text-gray-800">Italian Bistro</h3>
+        </div>
+        
+        <div class="p-4">
+          <div class="flex items-start gap-4 mb-4">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520pasta%2520dish%2520with%2520creamy%2520sauce%2520and%2520fresh%2520herbs%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation%252C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=100&height=100&seq=101&orientation=squarish" alt="Creamy Pasta" class="w-16 h-16 object-cover rounded-lg object-top">
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">Creamy Pasta</h4>
+                  <p class="text-sm text-gray-500">1 × $14.75</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-medium text-gray-800">$14.75</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-start gap-4 mb-4">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520fresh%2520garden%2520salad%2520with%2520mixed%2520greens%252C%2520cherry%2520tomatoes%252C%2520cucumber%2520slices%252C%2520and%2520light%2520vinaigrette%2520dressing%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation&width=100&height=100&seq=102&orientation=squarish" alt="Garden Salad" class="w-16 h-16 object-cover rounded-lg object-top">
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">Garden Salad</h4>
+                  <p class="text-sm text-gray-500">1 × $8.50</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-medium text-gray-800">$8.50</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-100 pt-4 mb-4">
+            <div class="flex justify-between text-gray-600 mb-1">
+              <span>Subtotal</span>
+              <span>$23.25</span>
+            </div>
+            <div class="flex justify-between text-gray-600 mb-1">
+              <span>Delivery Fee</span>
+              <span>$2.50</span>
+            </div>
+            <div class="flex justify-between font-bold text-gray-800 mt-2">
+              <span>Total</span>
+              <span>$25.75</span>
+            </div>
+          </div>
+          
+          <div class="flex flex-wrap gap-3">
+            <button class="bg-primary text-white px-4 py-2 rounded-button font-medium hover:bg-gray-800 transition flex items-center gap-2 whitespace-nowrap">
+              <i class="ri-map-pin-line"></i>
+              Track Order
+            </button>
+            <button class="bg-white text-primary border border-primary px-4 py-2 rounded-button font-medium hover:bg-gray-50 transition flex items-center gap-2 whitespace-nowrap view-details-btn" data-order="FD87612">
+              <i class="ri-file-list-line"></i>
+              View Details
+            </button>
+            <button class="bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-button font-medium hover:bg-gray-50 transition flex items-center gap-2 whitespace-nowrap">
+              <i class="ri-customer-service-2-line"></i>
+              Contact Support
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order 2 - Delivered -->
+      <div class="bg-white rounded-xl overflow-hidden card-shadow">
+        <div class="p-4 border-b border-gray-100">
+          <div class="flex justify-between items-center mb-2">
+            <div>
+              <span class="text-sm text-gray-500">Order #FD87524</span>
+              <span class="mx-2 text-gray-300">•</span>
+              <span class="text-sm text-gray-500">April 25, 2025</span>
+            </div>
+            <span class="status-pill status-delivered">Delivered</span>
+          </div>
+          <h3 class="font-bold text-gray-800">Burger House</h3>
+        </div>
+        
+        <div class="p-4">
+          <div class="flex items-start gap-4 mb-4">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520beef%2520burger%2520with%2520cheese%252C%2520lettuce%252C%2520tomato%252C%2520and%2520fries%2520on%2520the%2520side%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation%252C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=100&height=100&seq=103&orientation=squarish" alt="Classic Burger" class="w-16 h-16 object-cover rounded-lg object-top">
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">Classic Burger</h4>
+                  <p class="text-sm text-gray-500">2 × $13.50</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-medium text-gray-800">$27.00</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-start gap-4 mb-4">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520golden%2520crispy%2520french%2520fries%2520in%2520a%2520small%2520basket%252C%2520lightly%2520salted%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation%252C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=100&height=100&seq=104&orientation=squarish" alt="French Fries" class="w-16 h-16 object-cover rounded-lg object-top">
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">French Fries</h4>
+                  <p class="text-sm text-gray-500">1 × $4.50</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-medium text-gray-800">$4.50</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-100 pt-4 mb-4">
+            <div class="flex justify-between text-gray-600 mb-1">
+              <span>Subtotal</span>
+              <span>$31.50</span>
+            </div>
+            <div class="flex justify-between text-gray-600 mb-1">
+              <span>Delivery Fee</span>
+              <span>$2.50</span>
+            </div>
+            <div class="flex justify-between font-bold text-gray-800 mt-2">
+              <span>Total</span>
+              <span>$34.00</span>
+            </div>
+          </div>
+          
+          <div class="flex flex-wrap gap-3">
+            <button class="bg-primary text-white px-4 py-2 rounded-button font-medium hover:bg-gray-800 transition flex items-center gap-2 whitespace-nowrap">
+              <i class="ri-refresh-line"></i>
+              Reorder
+            </button>
+            <button class="bg-white text-primary border border-primary px-4 py-2 rounded-button font-medium hover:bg-gray-50 transition flex items-center gap-2 whitespace-nowrap view-details-btn" data-order="FD87524">
+              <i class="ri-file-list-line"></i>
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order 3 - Cancelled -->
+      <div class="bg-white rounded-xl overflow-hidden card-shadow">
+        <div class="p-4 border-b border-gray-100">
+          <div class="flex justify-between items-center mb-2">
+            <div>
+              <span class="text-sm text-gray-500">Order #FD87310</span>
+              <span class="mx-2 text-gray-300">•</span>
+              <span class="text-sm text-gray-500">April 20, 2025</span>
+            </div>
+            <span class="status-pill status-cancelled">Cancelled</span>
+          </div>
+          <h3 class="font-bold text-gray-800">Sushi Express</h3>
+        </div>
+        
+        <div class="p-4">
+          <div class="flex items-start gap-4 mb-4">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520sushi%2520platter%2520with%2520various%2520types%2520of%2520rolls%252C%2520nigiri%252C%2520and%2520sashimi%252C%2520with%2520wasabi%2520and%2520ginger%2520on%2520the%2520side%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation&width=100&height=100&seq=105&orientation=squarish" alt="Sushi Platter" class="w-16 h-16 object-cover rounded-lg object-top">
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">Sushi Platter</h4>
+                  <p class="text-sm text-gray-500">1 × $22.50</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-medium text-gray-800">$22.50</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-100 pt-4 mb-4">
+            <div class="flex justify-between text-gray-600 mb-1">
+              <span>Subtotal</span>
+              <span>$22.50</span>
+            </div>
+            <div class="flex justify-between text-gray-600 mb-1">
+              <span>Delivery Fee</span>
+              <span>$3.00</span>
+            </div>
+            <div class="flex justify-between font-bold text-gray-800 mt-2">
+              <span>Total</span>
+              <span>$25.50</span>
+            </div>
+          </div>
+          
+          <div class="flex flex-wrap gap-3">
+            <button class="bg-primary text-white px-4 py-2 rounded-button font-medium hover:bg-gray-800 transition flex items-center gap-2 whitespace-nowrap">
+              <i class="ri-refresh-line"></i>
+              Reorder
+            </button>
+            <button class="bg-white text-primary border border-primary px-4 py-2 rounded-button font-medium hover:bg-gray-50 transition flex items-center gap-2 whitespace-nowrap view-details-btn" data-order="FD87310">
+              <i class="ri-file-list-line"></i>
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order 4 - Pending -->
+      <div class="bg-white rounded-xl overflow-hidden card-shadow">
+        <div class="p-4 border-b border-gray-100">
+          <div class="flex justify-between items-center mb-2">
+            <div>
+              <span class="text-sm text-gray-500">Order #FD87129</span>
+              <span class="mx-2 text-gray-300">•</span>
+              <span class="text-sm text-gray-500">April 15, 2025</span>
+            </div>
+            <span class="status-pill status-pending">Pending</span>
+          </div>
+          <h3 class="font-bold text-gray-800">Thai Spice</h3>
+        </div>
+        
+        <div class="p-4">
+          <div class="flex items-start gap-4 mb-4">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520Thai%2520green%2520curry%2520with%2520rice%252C%2520garnished%2520with%2520fresh%2520herbs%2520and%2520lime%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation%252C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=100&height=100&seq=106&orientation=squarish" alt="Green Curry" class="w-16 h-16 object-cover rounded-lg object-top">
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">Green Curry</h4>
+                  <p class="text-sm text-gray-500">1 × $16.75</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-medium text-gray-800">$16.75</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-start gap-4 mb-4">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520Thai%2520spring%2520rolls%2520with%2520dipping%2520sauce%252C%2520garnished%2520with%2520fresh%2520herbs%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation%252C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=100&height=100&seq=107&orientation=squarish" alt="Spring Rolls" class="w-16 h-16 object-cover rounded-lg object-top">
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">Spring Rolls</h4>
+                  <p class="text-sm text-gray-500">1 × $7.50</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-medium text-gray-800">$7.50</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-100 pt-4 mb-4">
+            <div class="flex justify-between text-gray-600 mb-1">
+              <span>Subtotal</span>
+              <span>$24.25</span>
+            </div>
+            <div class="flex justify-between text-gray-600 mb-1">
+              <span>Delivery Fee</span>
+              <span>$2.75</span>
+            </div>
+            <div class="flex justify-between font-bold text-gray-800 mt-2">
+              <span>Total</span>
+              <span>$27.00</span>
+            </div>
+          </div>
+          
+          <div class="flex flex-wrap gap-3">
+            <button class="bg-primary text-white px-4 py-2 rounded-button font-medium hover:bg-gray-800 transition flex items-center gap-2 whitespace-nowrap">
+              <i class="ri-map-pin-line"></i>
+              Track Order
+            </button>
+            <button class="bg-white text-primary border border-primary px-4 py-2 rounded-button font-medium hover:bg-gray-50 transition flex items-center gap-2 whitespace-nowrap view-details-btn" data-order="FD87129">
+              <i class="ri-file-list-line"></i>
+              View Details
+            </button>
+            <button class="bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-button font-medium hover:bg-gray-50 transition flex items-center gap-2 whitespace-nowrap">
+              <i class="ri-customer-service-2-line"></i>
+              Contact Support
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-around items-center py-3">
+      <a href="Restaurant-Online-Shop.html" data-readdy="true" class="flex flex-col items-center">
+        <div class="w-6 h-6 flex items-center justify-center text-gray-500">
+          <i class="ri-home-5-line ri-lg"></i>
+        </div>
+        <span class="text-xs text-gray-500 font-medium mt-1">Home</span>
+      </a>
+      <a href="Menu-Page---Food-Categories.html" data-readdy="true" class="flex flex-col items-center">
+        <div class="w-6 h-6 flex items-center justify-center text-gray-500">
+          <i class="ri-restaurant-line ri-lg"></i>
+        </div>
+        <span class="text-xs text-gray-500 font-medium mt-1">Menu</span>
+      </a>
+      <a href="Order-History-and-Tracking.html" data-readdy="true" class="flex flex-col items-center">
+        <div class="w-6 h-6 flex items-center justify-center text-primary">
+          <i class="ri-shopping-bag-fill ri-lg"></i>
+        </div>
+        <span class="text-xs text-primary font-medium mt-1">Orders</span>
+      </a>
+      <a href="#" class="flex flex-col items-center">
+        <div class="w-6 h-6 flex items-center justify-center text-gray-500">
+          <i class="ri-user-line ri-lg"></i>
+        </div>
+        <span class="text-xs text-gray-500 font-medium mt-1">Profile</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Order Details Modal -->
+<div id="orderDetailsModal" class="order-details-modal">
+  <div class="order-details-content p-6 mx-4">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold text-gray-800">Order Details</h2>
+      <button id="closeOrderDetails" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <div>
+          <span class="text-sm text-gray-500" id="orderIdDisplay">Order #FD87612</span>
+          <span class="mx-2 text-gray-300">•</span>
+          <span class="text-sm text-gray-500" id="orderDateDisplay">April 28, 2025</span>
+        </div>
+        <span class="status-pill status-processing" id="orderStatusDisplay">Processing</span>
+      </div>
+      <h3 class="font-bold text-gray-800" id="restaurantNameDisplay">Italian Bistro</h3>
+    </div>
+    
+    <!-- Order Status Timeline -->
+    <div class="mb-6">
+      <h4 class="font-medium text-gray-800 mb-4">Order Status</h4>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot completed"></div>
+          <div>
+            <h5 class="font-medium text-gray-800">Order Placed</h5>
+            <p class="text-sm text-gray-500">April 28, 2025 • 12:30 PM</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot completed"></div>
+          <div>
+            <h5 class="font-medium text-gray-800">Order Confirmed</h5>
+            <p class="text-sm text-gray-500">April 28, 2025 • 12:35 PM</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot active"></div>
+          <div>
+            <h5 class="font-medium text-gray-800">Preparing</h5>
+            <p class="text-sm text-gray-500">April 28, 2025 • 12:45 PM</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot inactive"></div>
+          <div>
+            <h5 class="font-medium text-gray-700">Out for Delivery</h5>
+            <p class="text-sm text-gray-500">Estimated: 1:15 PM</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot inactive"></div>
+          <div>
+            <h5 class="font-medium text-gray-700">Delivered</h5>
+            <p class="text-sm text-gray-500">Estimated: 1:30 PM</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Delivery Address -->
+    <div class="mb-6">
+      <h4 class="font-medium text-gray-800 mb-2">Delivery Address</h4>
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 flex items-center justify-center text-primary mt-0.5">
+            <i class="ri-map-pin-line"></i>
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">Home</p>
+            <p class="text-sm text-gray-600">123 Main Street, Apt 4B, New York, NY 10001</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Payment Method -->
+    <div class="mb-6">
+      <h4 class="font-medium text-gray-800 mb-2">Payment Method</h4>
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="flex items-center gap-3">
+          <div class="w-6 h-6 flex items-center justify-center text-blue-500">
+            <i class="ri-bank-card-fill"></i>
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">Credit Card</p>
+            <p class="text-sm text-gray-600">**** **** **** 4582</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Order Items -->
+    <div class="mb-6">
+      <h4 class="font-medium text-gray-800 mb-4">Order Items</h4>
+      <div id="orderItemsContainer">
+        <!-- Items will be dynamically inserted here -->
+        <div class="flex items-start gap-4 mb-4">
+          <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520pasta%2520dish%2520with%2520creamy%2520sauce%2520and%2520fresh%2520herbs%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation%252C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=100&height=100&seq=101&orientation=squarish" alt="Creamy Pasta" class="w-16 h-16 object-cover rounded-lg object-top">
+          <div class="flex-1">
+            <div class="flex justify-between">
+              <div>
+                <h4 class="font-medium text-gray-800">Creamy Pasta</h4>
+                <p class="text-sm text-gray-500">1 × $14.75</p>
+              </div>
+              <div class="text-right">
+                <p class="font-medium text-gray-800">$14.75</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex items-start gap-4 mb-4">
+          <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520fresh%2520garden%2520salad%2520with%2520mixed%2520greens%252C%2520cherry%2520tomatoes%252C%2520cucumber%2520slices%252C%2520and%2520light%2520vinaigrette%2520dressing%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation&width=100&height=100&seq=102&orientation=squarish" alt="Garden Salad" class="w-16 h-16 object-cover rounded-lg object-top">
+          <div class="flex-1">
+            <div class="flex justify-between">
+              <div>
+                <h4 class="font-medium text-gray-800">Garden Salad</h4>
+                <p class="text-sm text-gray-500">1 × $8.50</p>
+              </div>
+              <div class="text-right">
+                <p class="font-medium text-gray-800">$8.50</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Order Summary -->
+    <div class="mb-6">
+      <h4 class="font-medium text-gray-800 mb-2">Order Summary</h4>
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="flex justify-between mb-2">
+          <span class="text-gray-600">Subtotal</span>
+          <span id="subtotalDisplay">$23.25</span>
+        </div>
+        <div class="flex justify-between mb-2">
+          <span class="text-gray-600">Delivery Fee</span>
+          <span id="deliveryFeeDisplay">$2.50</span>
+        </div>
+        <div class="border-t border-gray-200 my-2"></div>
+        <div class="flex justify-between font-bold">
+          <span>Total</span>
+          <span id="totalDisplay">$25.75</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="flex flex-wrap gap-3">
+      <button class="bg-primary text-white px-4 py-2 rounded-button font-medium hover:bg-gray-800 transition flex-1 whitespace-nowrap" id="actionButton">
+        <span class="flex items-center gap-2 justify-center">
+          <i class="ri-map-pin-line"></i>
+          Track Order
+        </span>
+      </button>
+      <button class="bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-button font-medium hover:bg-gray-50 transition flex-1 whitespace-nowrap">
+        <span class="flex items-center gap-2 justify-center">
+          <i class="ri-customer-service-2-line"></i>
+          Contact Support
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Dropdown functionality
+  const dateFilterBtn = document.getElementById('dateFilterBtn');
+  const dateFilterMenu = document.getElementById('dateFilterMenu');
+  const statusFilterBtn = document.getElementById('statusFilterBtn');
+  const statusFilterMenu = document.getElementById('statusFilterMenu');
+  
+  dateFilterBtn.addEventListener('click', function() {
+    dateFilterMenu.classList.toggle('show');
+    statusFilterMenu.classList.remove('show');
+  });
+  
+  statusFilterBtn.addEventListener('click', function() {
+    statusFilterMenu.classList.toggle('show');
+    dateFilterMenu.classList.remove('show');
+  });
+  
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function(event) {
+    if (!dateFilterBtn.contains(event.target) && !dateFilterMenu.contains(event.target)) {
+      dateFilterMenu.classList.remove('show');
+    }
+    
+    if (!statusFilterBtn.contains(event.target) && !statusFilterMenu.contains(event.target)) {
+      statusFilterMenu.classList.remove('show');
+    }
+  });
+  
+  // Dropdown option selection
+  const dateOptions = dateFilterMenu.querySelectorAll('button');
+  dateOptions.forEach(option => {
+    option.addEventListener('click', function() {
+      dateFilterBtn.querySelector('span').textContent = this.textContent;
+      dateFilterMenu.classList.remove('show');
+      
+      // Update active state
+      dateOptions.forEach(opt => opt.classList.remove('text-primary', 'font-medium'));
+      dateOptions.forEach(opt => opt.classList.add('text-gray-700'));
+      this.classList.remove('text-gray-700');
+      this.classList.add('text-primary', 'font-medium');
+    });
+  });
+  
+  const statusOptions = statusFilterMenu.querySelectorAll('button');
+  statusOptions.forEach(option => {
+    option.addEventListener('click', function() {
+      statusFilterBtn.querySelector('span').textContent = this.textContent;
+      statusFilterMenu.classList.remove('show');
+      
+      // Update active state
+      statusOptions.forEach(opt => opt.classList.remove('text-primary', 'font-medium'));
+      statusOptions.forEach(opt => opt.classList.add('text-gray-700'));
+      this.classList.remove('text-gray-700');
+      this.classList.add('text-primary', 'font-medium');
+    });
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Order details modal functionality
+  const orderDetailsModal = document.getElementById('orderDetailsModal');
+  const closeOrderDetails = document.getElementById('closeOrderDetails');
+  const viewDetailsButtons = document.querySelectorAll('.view-details-btn');
+  
+  // Order data
+  const orders = {
+    'FD87612': {
+      id: 'FD87612',
+      date: 'April 28, 2025',
+      status: 'Processing',
+      statusClass: 'status-processing',
+      restaurant: 'Italian Bistro',
+      items: [
+        { name: 'Creamy Pasta', price: 14.75, quantity: 1, image: 'https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520pasta%2520dish%2520with%2520creamy%2520sauce%2520and%2520fresh%2520herbs%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation%252C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=100&height=100&seq=101&orientation=squarish' },
+        { name: 'Garden Salad', price: 8.50, quantity: 1, image: 'https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520fresh%2520garden%2520salad%2520with%2520mixed%2520greens%252C%2520cherry%2520tomatoes%252C%2520cucumber%2520slices%252C%2520and%2520light%2520vinaigrette%2520dressing%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation&width=100&height=100&seq=102&orientation=squarish' }
+      ],
+      subtotal: 23.25,
+      deliveryFee: 2.50,
+      total: 25.75,
+      actionButton: { text: 'Track Order', icon: 'ri-map-pin-line' }
+    },
+    'FD87524': {
+      id: 'FD87524',
+      date: 'April 25, 2025',
+      status: 'Delivered',
+      statusClass: 'status-delivered',
+      restaurant: 'Burger House',
+      items: [
+        { name: 'Classic Burger', price: 13.50, quantity: 2, image: 'https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520beef%2520burger%2520with%2520cheese%252C%2520lettuce%252C%2520tomato%252C%2520and%2520fries%2520on%2520the%2520side%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation%252C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=100&height=100&seq=103&orientation=squarish' },
+        { name: 'French Fries', price: 4.50, quantity: 1, image: 'https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520golden%2520crispy%2520french%2520fries%2520in%2520a%2520small%2520basket%252C%2520lightly%2520salted%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation%252C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=100&height=100&seq=104&orientation=squarish' }
+      ],
+      subtotal: 31.50,
+      deliveryFee: 2.50,
+      total: 34.00,
+      actionButton: { text: 'Reorder', icon: 'ri-refresh-line' }
+    },
+    'FD87310': {
+      id: 'FD87310',
+      date: 'April 20, 2025',
+      status: 'Cancelled',
+      statusClass: 'status-cancelled',
+      restaurant: 'Sushi Express',
+      items: [
+        { name: 'Sushi Platter', price: 22.50, quantity: 1, image: 'https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520sushi%2520platter%2520with%2520various%2520types%2520of%2520rolls%252C%2520nigiri%252C%2520and%2520sashimi%252C%2520with%2520wasabi%2520and%2520ginger%2520on%2520the%2520side%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation&width=100&height=100&seq=105&orientation=squarish' }
+      ],
+      subtotal: 22.50,
+      deliveryFee: 3.00,
+      total: 25.50,
+      actionButton: { text: 'Reorder', icon: 'ri-refresh-line' }
+    },
+    'FD87129': {
+      id: 'FD87129',
+      date: 'April 15, 2025',
+      status: 'Pending',
+      statusClass: 'status-pending',
+      restaurant: 'Thai Spice',
+      items: [
+        { name: 'Green Curry', price: 16.75, quantity: 1, image: 'https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520Thai%2520green%2520curry%2520with%2520rice%252C%2520garnished%2520with%2520fresh%2520herbs%2520and%2520lime%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation%252C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=100&height=100&seq=106&orientation=squarish' },
+        { name: 'Spring Rolls', price: 7.50, quantity: 1, image: 'https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520Thai%2520spring%2520rolls%2520with%2520dipping%2520sauce%252C%2520garnished%2520with%2520fresh%2520herbs%252C%2520soft%2520natural%2520lighting%252C%2520shallow%2520depth%2520of%2520field%252C%2520high-end%2520restaurant%2520quality%2520presentation%252C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=100&height=100&seq=107&orientation=squarish' }
+      ],
+      subtotal: 24.25,
+      deliveryFee: 2.75,
+      total: 27.00,
+      actionButton: { text: 'Track Order', icon: 'ri-map-pin-line' }
+    }
+  };
+  
+  // Open modal with order details
+  viewDetailsButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const orderId = this.getAttribute('data-order');
+      const order = orders[orderId];
+      
+      if (order) {
+        // Update modal content with order details
+        document.getElementById('orderIdDisplay').textContent = `Order #${order.id}`;
+        document.getElementById('orderDateDisplay').textContent = order.date;
+        document.getElementById('restaurantNameDisplay').textContent = order.restaurant;
+        
+        const statusDisplay = document.getElementById('orderStatusDisplay');
+        statusDisplay.textContent = order.status;
+        statusDisplay.className = `status-pill ${order.statusClass}`;
+        
+        // Update timeline based on order status
+        updateOrderTimeline(order.status);
+        
+        // Update order items
+        const itemsContainer = document.getElementById('orderItemsContainer');
+        itemsContainer.innerHTML = '';
+        
+        order.items.forEach(item => {
+          const itemElement = document.createElement('div');
+          itemElement.className = 'flex items-start gap-4 mb-4';
+          itemElement.innerHTML = `
+            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg object-top">
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">${item.name}</h4>
+                  <p class="text-sm text-gray-500">${item.quantity} × $${item.price.toFixed(2)}</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-medium text-gray-800">$${(item.quantity * item.price).toFixed(2)}</p>
+                </div>
+              </div>
+            </div>
+          `;
+          itemsContainer.appendChild(itemElement);
+        });
+        
+        // Update order summary
+        document.getElementById('subtotalDisplay').textContent = `$${order.subtotal.toFixed(2)}`;
+        document.getElementById('deliveryFeeDisplay').textContent = `$${order.deliveryFee.toFixed(2)}`;
+        document.getElementById('totalDisplay').textContent = `$${order.total.toFixed(2)}`;
+        
+        // Update action button
+        const actionButton = document.getElementById('actionButton');
+        actionButton.innerHTML = `
+          <span class="flex items-center gap-2 justify-center">
+            <i class="${order.actionButton.icon}"></i>
+            ${order.actionButton.text}
+          </span>
+        `;
+        
+        // Show modal
+        orderDetailsModal.classList.add('show');
+      }
+    });
+  });
+  
+  // Close modal
+  closeOrderDetails.addEventListener('click', function() {
+    orderDetailsModal.classList.remove('show');
+  });
+  
+  // Close modal when clicking outside
+  orderDetailsModal.addEventListener('click', function(event) {
+    if (event.target === orderDetailsModal) {
+      orderDetailsModal.classList.remove('show');
+    }
+  });
+  
+  // Update timeline based on order status
+  function updateOrderTimeline(status) {
+    const timelineDots = document.querySelectorAll('.timeline-dot');
+    
+    // Reset all dots
+    timelineDots.forEach(dot => {
+      dot.classList.remove('active', 'completed');
+      dot.classList.add('inactive');
+    });
+    
+    // Update dots based on status
+    if (status === 'Delivered') {
+      // All steps completed
+      timelineDots.forEach(dot => {
+        dot.classList.remove('inactive', 'active');
+        dot.classList.add('completed');
+      });
+    } else if (status === 'Cancelled') {
+      // First two steps completed, then cancelled
+      timelineDots[0].classList.remove('inactive');
+      timelineDots[0].classList.add('completed');
+      timelineDots[1].classList.remove('inactive');
+      timelineDots[1].classList.add('completed');
+      timelineDots[2].classList.remove('inactive');
+      timelineDots[2].classList.add('active');
+    } else if (status === 'Processing') {
+      // First two steps completed, preparing active
+      timelineDots[0].classList.remove('inactive');
+      timelineDots[0].classList.add('completed');
+      timelineDots[1].classList.remove('inactive');
+      timelineDots[1].classList.add('completed');
+      timelineDots[2].classList.remove('inactive');
+      timelineDots[2].classList.add('active');
+    } else if (status === 'Pending') {
+      // First step completed, confirming active
+      timelineDots[0].classList.remove('inactive');
+      timelineDots[0].classList.add('completed');
+      timelineDots[1].classList.remove('inactive');
+      timelineDots[1].classList.add('active');
+    }
+  }
+});
+</script>
+</body>
+</html>

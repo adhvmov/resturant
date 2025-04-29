@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foodie - Online Restaurant</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#1f2937',secondary:'#4b5563'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+.glass-effect {
+background: rgba(255, 255, 255, 0.7);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+}
+.card-shadow {
+box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+.custom-checkbox {
+appearance: none;
+-webkit-appearance: none;
+width: 20px;
+height: 20px;
+border: 2px solid #e5e7eb;
+border-radius: 4px;
+outline: none;
+cursor: pointer;
+position: relative;
+}
+.custom-checkbox:checked {
+background-color: #1f2937;
+border-color: #1f2937;
+}
+.custom-checkbox:checked::after {
+content: "";
+position: absolute;
+top: 3px;
+left: 6px;
+width: 6px;
+height: 10px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<!-- Top Navigation -->
+<header class="fixed top-0 left-0 right-0 z-50 glass-effect">
+<div class="container mx-auto px-4 py-4 flex justify-between items-center">
+<a href="#" class="font-['Pacifico'] text-2xl text-primary">logo</a>
+<div class="flex items-center gap-6">
+<div class="relative w-10 h-10 flex items-center justify-center bg-black rounded-full cursor-pointer">
+<i class="ri-shopping-cart-line text-white ri-lg"></i>
+<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">3</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="pt-20 pb-24">
+<!-- Hero Carousel -->
+<div class="relative overflow-hidden mb-8">
+<div class="container mx-auto px-4">
+<div class="relative bg-gradient-to-r from-amber-50 to-orange-100 rounded-2xl overflow-hidden">
+<div class="flex flex-col md:flex-row items-center p-6 md:p-10">
+<div class="md:w-1/2 mb-6 md:mb-0">
+<h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Delicious Food Delivered to Your Door</h1>
+<p class="text-gray-600 mb-6">Order your favorite meals from our restaurant and enjoy them in the comfort of your home.</p>
+<button class="bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-gray-800 transition whitespace-nowrap">Order Now</button>
+</div>
+<div class="md:w-1/2 flex justify-center">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20a%20delicious%20gourmet%20meal%20with%20vibrant%20colors%2C%20beautifully%20plated%20dish%20with%20fresh%20ingredients%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=600&height=400&seq=1&orientation=landscape" alt="Featured Dish" class="rounded-xl object-cover h-64 md:h-80 w-full object-top">
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Categories -->
+<div class="container mx-auto px-4 mb-8">
+<h2 class="text-2xl font-bold text-gray-800 mb-4">Categories</h2>
+<div class="flex overflow-x-auto pb-2 gap-4 no-scrollbar" id="categoryButtons">
+<button id="allCategory" class="category-btn bg-primary text-white px-6 py-2 rounded-full font-medium whitespace-nowrap transition-all duration-300" data-category="all">All</button>
+<button id="breakfastCategory" class="category-btn bg-white text-gray-700 px-6 py-2 rounded-full font-medium border border-gray-200 whitespace-nowrap transition-all duration-300" data-category="breakfast">Breakfast</button>
+<button id="lunchCategory" class="category-btn bg-white text-gray-700 px-6 py-2 rounded-full font-medium border border-gray-200 whitespace-nowrap transition-all duration-300" data-category="lunch">Lunch</button>
+<button id="dinnerCategory" class="category-btn bg-white text-gray-700 px-6 py-2 rounded-full font-medium border border-gray-200 whitespace-nowrap transition-all duration-300" data-category="dinner">Dinner</button>
+<button id="dessertsCategory" class="category-btn bg-white text-gray-700 px-6 py-2 rounded-full font-medium border border-gray-200 whitespace-nowrap transition-all duration-300" data-category="desserts">Desserts</button>
+<button id="drinksCategory" class="category-btn bg-white text-gray-700 px-6 py-2 rounded-full font-medium border border-gray-200 whitespace-nowrap transition-all duration-300" data-category="drinks">Drinks</button>
+</div>
+</div>
+<!-- Best Sellers -->
+<div class="container mx-auto px-4 mb-8">
+<h2 class="text-2xl font-bold text-gray-800 mb-4">Best Sellers</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Product Card 1 -->
+<div class="bg-white rounded-2xl overflow-hidden card-shadow">
+<div class="relative">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20eggs%20curry%20dish%20with%20sliced%20tomatoes%2C%20cucumbers%2C%20and%20herbs%20in%20a%20blue%20ceramic%20bowl%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=400&height=300&seq=2&orientation=landscape" alt="Eggs Curry" class="w-full h-48 object-cover object-top">
+<button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+<i class="ri-heart-line text-gray-500"></i>
+</button>
+</div>
+<div class="p-4">
+<h3 class="text-lg font-bold text-gray-800">Eggs Curry</h3>
+<p class="text-sm text-gray-500 mb-2">Eggs Curry with tomato and cucumbers, our chefs special healthy dish.</p>
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold text-gray-800">$15.00</span>
+<button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+<i class="ri-add-line"></i>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-white rounded-2xl overflow-hidden card-shadow">
+<div class="relative">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20grilled%20chicken%20breast%20on%20a%20bed%20of%20fresh%20green%20salad%20with%20cherry%20tomatoes%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=400&height=300&seq=3&orientation=landscape" alt="Chicken Slice" class="w-full h-48 object-cover object-top">
+<button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+<i class="ri-heart-line text-gray-500"></i>
+</button>
+</div>
+<div class="p-4">
+<h3 class="text-lg font-bold text-gray-800">Chicken Slice</h3>
+<p class="text-sm text-gray-500 mb-2">Real chicken breast grilled to perfection with fresh salad.</p>
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold text-gray-800">$12.00</span>
+<button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+<i class="ri-add-line"></i>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-white rounded-2xl overflow-hidden card-shadow">
+<div class="relative">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20a%20salmon%20fillet%20with%20roasted%20vegetables%2C%20garnished%20with%20herbs%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=400&height=300&seq=4&orientation=landscape" alt="Salmon Delight" class="w-full h-48 object-cover object-top">
+<button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+<i class="ri-heart-line text-gray-500"></i>
+</button>
+</div>
+<div class="p-4">
+<h3 class="text-lg font-bold text-gray-800">Salmon Delight</h3>
+<p class="text-sm text-gray-500 mb-2">Fresh salmon fillet with roasted seasonal vegetables.</p>
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold text-gray-800">$18.50</span>
+<button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+<i class="ri-add-line"></i>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Popular Dishes -->
+<div class="container mx-auto px-4 mb-8">
+<h2 class="text-2xl font-bold text-gray-800 mb-4">Popular Dishes</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Product Card 4 -->
+<div class="bg-white rounded-2xl overflow-hidden card-shadow">
+<div class="relative">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20a%20pasta%20dish%20with%20creamy%20sauce%20and%20fresh%20herbs%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=400&height=300&seq=5&orientation=landscape" alt="Creamy Pasta" class="w-full h-48 object-cover object-top">
+<button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+<i class="ri-heart-line text-gray-500"></i>
+</button>
+</div>
+<div class="p-4">
+<h3 class="text-lg font-bold text-gray-800">Creamy Pasta</h3>
+<p class="text-sm text-gray-500 mb-2">Al dente pasta with our signature creamy sauce and fresh herbs.</p>
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold text-gray-800">$14.75</span>
+<button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+<i class="ri-add-line"></i>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 5 -->
+<div class="bg-white rounded-2xl overflow-hidden card-shadow">
+<div class="relative">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20a%20vegetable%20stir%20fry%20with%20colorful%20bell%20peppers%2C%20broccoli%2C%20and%20carrots%20in%20a%20dark%20bowl%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=400&height=300&seq=6&orientation=landscape" alt="Vegetable Stir Fry" class="w-full h-48 object-cover object-top">
+<button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+<i class="ri-heart-line text-gray-500"></i>
+</button>
+</div>
+<div class="p-4">
+<h3 class="text-lg font-bold text-gray-800">Vegetable Stir Fry</h3>
+<p class="text-sm text-gray-500 mb-2">Fresh seasonal vegetables stir-fried with our special sauce.</p>
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold text-gray-800">$11.25</span>
+<button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+<i class="ri-add-line"></i>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 6 -->
+<div class="bg-white rounded-2xl overflow-hidden card-shadow">
+<div class="relative">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20a%20beef%20burger%20with%20cheese%2C%20lettuce%2C%20tomato%2C%20and%20fries%20on%20the%20side%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=400&height=300&seq=7&orientation=landscape" alt="Classic Burger" class="w-full h-48 object-cover object-top">
+<button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+<i class="ri-heart-line text-gray-500"></i>
+</button>
+</div>
+<div class="p-4">
+<h3 class="text-lg font-bold text-gray-800">Classic Burger</h3>
+<p class="text-sm text-gray-500 mb-2">Juicy beef patty with cheese, fresh vegetables, and our special sauce.</p>
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold text-gray-800">$13.50</span>
+<button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+<i class="ri-add-line"></i>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+<div class="container mx-auto px-4">
+<div class="flex justify-around items-center py-3">
+<a href="Restaurant-Online-Shop.html" class="flex flex-col items-center">
+<div class="w-6 h-6 flex items-center justify-center text-primary">
+<i class="ri-home-5-fill ri-lg"></i>
+</div>
+<span class="text-xs text-primary font-medium mt-1">Home</span>
+</a>
+<a href="Menu-Page---Food-Categories.html" data-readdy="true" class="flex flex-col items-center">
+<div class="w-6 h-6 flex items-center justify-center text-gray-500">
+<i class="ri-restaurant-line ri-lg"></i>
+</div>
+<span class="text-xs text-gray-500 font-medium mt-1">Menu</span>
+</a>
+<a href="Order-History-and-Tracking.html" data-readdy="true" class="flex flex-col items-center">
+<div class="w-6 h-6 flex items-center justify-center text-gray-500">
+<i class="ri-shopping-bag-line ri-lg"></i>
+</div>
+<span class="text-xs text-gray-500 font-medium mt-1">Orders</span>
+</a>
+<a href="#" data-readdy="true" class="flex flex-col items-center">
+<div class="w-6 h-6 flex items-center justify-center text-gray-500">
+<i class="ri-user-line ri-lg"></i>
+</div>
+<span class="text-xs text-gray-500 font-medium mt-1">Profile</span>
+</a>
+</div>
+</div>
+</nav>
+<!-- Product Detail Modal (Initially Hidden) -->
+<div id="productDetailModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center hidden">
+<div class="bg-white rounded-2xl w-full max-w-md mx-4 overflow-hidden">
+<div class="relative">
+<button id="closeModal" class="absolute top-4 left-4 w-8 h-8 bg-white rounded-full flex items-center justify-center z-10">
+<i class="ri-arrow-left-s-line text-gray-800"></i>
+</button>
+<div class="relative">
+<button id="moreOptionsBtn" class="absolute top-4 right-4 w-8 h-8 bg-white rounded-full flex items-center justify-center z-10">
+<i class="ri-more-2-fill text-gray-800"></i>
+</button>
+<div id="moreOptionsMenu" class="hidden absolute top-14 right-4 w-48 bg-white rounded-xl shadow-lg py-2 z-20">
+<button class="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center">
+<i class="ri-heart-line mr-2"></i>
+Add to favorites
+</button>
+<button class="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center">
+<i class="ri-share-line mr-2"></i>
+Share
+</button>
+<button class="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center">
+<i class="ri-flag-line mr-2"></i>
+Report item
+</button>
+<button class="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center">
+<i class="ri-information-line mr-2"></i>
+See nutritional info
+</button>
+</div>
+</div>
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20eggs%20curry%20dish%20with%20sliced%20tomatoes%2C%20cucumbers%2C%20and%20herbs%20in%20a%20blue%20ceramic%20bowl%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=600&height=400&seq=8&orientation=landscape" alt="Eggs Curry" class="w-full h-64 object-cover object-top">
+</div>
+<div class="p-6">
+<div class="flex justify-between items-center mb-2">
+<h2 class="text-2xl font-bold text-gray-800">Eggs Curry</h2>
+<div class="flex items-center text-gray-600">
+<i class="ri-time-line mr-1"></i>
+<span>25 Mins</span>
+</div>
+</div>
+<p class="text-gray-600 mb-6">Eggs Curry with tomato and cucumbers our chefs special healthy and fat free dish for those who want to lose weight.</p>
+<div class="flex justify-between items-center mb-6">
+<span class="text-2xl font-bold text-gray-800">$15.00</span>
+<button id="addToCartBtn" class="bg-primary text-white px-6 py-2 rounded-button font-medium hover:bg-gray-800 transition flex items-center whitespace-nowrap">
+<i class="ri-shopping-cart-line mr-2"></i>
+Add to Cart
+</button>
+</div>
+<div>
+<h3 class="text-lg font-bold text-gray-800 mb-2">You might also like</h3>
+<div class="flex overflow-x-auto gap-4 pb-2">
+<div class="flex-shrink-0 w-32">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20grilled%20chicken%20breast%20on%20a%20bed%20of%20fresh%20green%20salad%20with%20cherry%20tomatoes%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=150&height=150&seq=9&orientation=squarish" alt="Chicken Slice" class="w-full h-24 object-cover rounded-lg object-top">
+<p class="text-sm font-medium mt-1">Chicken Slice</p>
+<p class="text-xs text-gray-500">$12.00</p>
+</div>
+<div class="flex-shrink-0 w-32">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20a%20salmon%20fillet%20with%20roasted%20vegetables%2C%20garnished%20with%20herbs%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=150&height=150&seq=10&orientation=squarish" alt="Salmon Delight" class="w-full h-24 object-cover rounded-lg object-top">
+<p class="text-sm font-medium mt-1">Salmon Delight</p>
+<p class="text-xs text-gray-500">$18.50</p>
+</div>
+<div class="flex-shrink-0 w-32">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20a%20pasta%20dish%20with%20creamy%20sauce%20and%20fresh%20herbs%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=150&height=150&seq=11&orientation=squarish" alt="Creamy Pasta" class="w-full h-24 object-cover rounded-lg object-top">
+<p class="text-sm font-medium mt-1">Creamy Pasta</p>
+<p class="text-xs text-gray-500">$14.75</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Cart Page (Initially Hidden) -->
+<div id="cartPage" class="fixed inset-0 z-50 bg-white transform translate-x-full transition-transform duration-300">
+<div class="flex flex-col h-full">
+<div class="p-4 border-b border-gray-200 flex items-center">
+<button id="closeCart" class="w-10 h-10 flex items-center justify-center">
+<i class="ri-arrow-left-s-line text-gray-800 ri-lg"></i>
+</button>
+<h2 class="text-xl font-bold text-gray-800 ml-4">Your Cart</h2>
+</div>
+<div class="flex-grow overflow-auto p-4">
+<!-- Cart Item 1 -->
+<div class="flex items-center py-4 border-b border-gray-100">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20eggs%20curry%20dish%20with%20sliced%20tomatoes%2C%20cucumbers%2C%20and%20herbs%20in%20a%20blue%20ceramic%20bowl%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=100&height=100&seq=12&orientation=squarish" alt="Eggs Curry" class="w-20 h-20 object-cover rounded-lg object-top">
+<div class="ml-4 flex-grow">
+<h3 class="font-medium text-gray-800">Eggs Curry</h3>
+<p class="text-sm text-gray-500">$15.00</p>
+</div>
+<div class="flex items-center border border-gray-200 rounded-lg">
+<button class="w-8 h-8 flex items-center justify-center text-gray-500">
+<i class="ri-subtract-line"></i>
+</button>
+<span class="w-8 text-center">1</span>
+<button class="w-8 h-8 flex items-center justify-center text-gray-500">
+<i class="ri-add-line"></i>
+</button>
+</div>
+</div>
+<!-- Cart Item 2 -->
+<div class="flex items-center py-4 border-b border-gray-100">
+<img src="https://readdy.ai/api/search-image?query=Professional%20food%20photography%20of%20grilled%20chicken%20breast%20on%20a%20bed%20of%20fresh%20green%20salad%20with%20cherry%20tomatoes%2C%20soft%20natural%20lighting%2C%20shallow%20depth%20of%20field%2C%20high-end%20restaurant%20quality%20presentation%2C%20appetizing%20and%20mouthwatering%20appearance&width=100&height=100&seq=13&orientation=squarish" alt="Chicken Slice" class="w-20 h-20 object-cover rounded-lg object-top">
+<div class="ml-4 flex-grow">
+<h3 class="font-medium text-gray-800">Chicken Slice</h3>
+<p class="text-sm text-gray-500">$12.00</p>
+</div>
+<div class="flex items-center border border-gray-200 rounded-lg">
+<button class="w-8 h-8 flex items-center justify-center text-gray-500">
+<i class="ri-subtract-line"></i>
+</button>
+<span class="w-8 text-center">2</span>
+<button class="w-8 h-8 flex items-center justify-center text-gray-500">
+<i class="ri-add-line"></i>
+</button>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-gray-200">
+<div class="flex justify-between mb-2">
+<span class="text-gray-600">Subtotal</span>
+<span class="font-medium">$39.00</span>
+</div>
+<div class="flex justify-between mb-2">
+<span class="text-gray-600">Delivery Fee</span>
+<span class="font-medium">$2.50</span>
+</div>
+<div class="flex justify-between mb-4">
+<span class="text-gray-800 font-bold">Total</span>
+<span class="text-gray-800 font-bold">$41.50</span>
+</div>
+<button id="checkoutBtn" class="w-full bg-primary text-white py-3 rounded-button font-medium hover:bg-gray-800 transition whitespace-nowrap">Proceed to Checkout</button>
+</div>
+</div>
+</div>
+<!-- Checkout Page (Initially Hidden) -->
+<div id="checkoutPage" class="fixed inset-0 z-50 bg-white transform translate-x-full transition-transform duration-300">
+<div class="flex flex-col h-full">
+<div class="p-4 border-b border-gray-200 flex items-center">
+<button id="backToCart" class="w-10 h-10 flex items-center justify-center">
+<i class="ri-arrow-left-s-line text-gray-800 ri-lg"></i>
+</button>
+<h2 class="text-xl font-bold text-gray-800 ml-4">Checkout</h2>
+</div>
+<div class="flex-grow overflow-auto p-4">
+<!-- Delivery Address -->
+<div class="mb-6">
+<h3 class="text-lg font-bold text-gray-800 mb-3">Delivery Address</h3>
+<div class="bg-gray-50 p-4 rounded-lg">
+<div class="flex items-start mb-4">
+<input type="radio" name="address" id="address1" checked class="custom-checkbox mt-1">
+<label for="address1" class="ml-3">
+<p class="font-medium text-gray-800">Home</p>
+<p class="text-sm text-gray-600">123 Main Street, Apt 4B, New York, NY 10001</p>
+</label>
+</div>
+<div class="flex items-start">
+<input type="radio" name="address" id="address2" class="custom-checkbox mt-1">
+<label for="address2" class="ml-3">
+<p class="font-medium text-gray-800">Office</p>
+<p class="text-sm text-gray-600">456 Business Ave, Suite 200, New York, NY 10002</p>
+</label>
+</div>
+</div>
+<button class="text-primary font-medium mt-2 flex items-center">
+<i class="ri-add-line mr-1"></i> Add New Address
+</button>
+</div>
+<!-- Payment Method -->
+<div class="mb-6">
+<h3 class="text-lg font-bold text-gray-800 mb-3">Payment Method</h3>
+<div class="bg-gray-50 p-4 rounded-lg">
+<div class="flex items-center mb-4">
+<input type="radio" name="payment" id="card" checked class="custom-checkbox">
+<label for="card" class="ml-3 flex items-center">
+<div class="w-8 h-8 flex items-center justify-center mr-2">
+<i class="ri-bank-card-fill text-blue-500 ri-lg"></i>
+</div>
+<span class="font-medium text-gray-800">Credit/Debit Card</span>
+</label>
+</div>
+<div class="flex items-center mb-4">
+<input type="radio" name="payment" id="paypal" class="custom-checkbox">
+<label for="paypal" class="ml-3 flex items-center">
+<div class="w-8 h-8 flex items-center justify-center mr-2">
+<i class="ri-paypal-fill text-blue-700 ri-lg"></i>
+</div>
+<span class="font-medium text-gray-800">PayPal</span>
+</label>
+</div>
+<div class="flex items-center">
+<input type="radio" name="payment" id="cash" class="custom-checkbox">
+<label for="cash" class="ml-3 flex items-center">
+<div class="w-8 h-8 flex items-center justify-center mr-2">
+<i class="ri-money-dollar-circle-fill text-green-600 ri-lg"></i>
+</div>
+<span class="font-medium text-gray-800">Cash on Delivery</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Order Summary -->
+<div>
+<h3 class="text-lg font-bold text-gray-800 mb-3">Order Summary</h3>
+<div class="bg-gray-50 p-4 rounded-lg">
+<div class="flex justify-between mb-2">
+<span class="text-gray-600">Eggs Curry x1</span>
+<span>$15.00</span>
+</div>
+<div class="flex justify-between mb-2">
+<span class="text-gray-600">Chicken Slice x2</span>
+<span>$24.00</span>
+</div>
+<div class="border-t border-gray-200 my-2"></div>
+<div class="flex justify-between mb-2">
+<span class="text-gray-600">Subtotal</span>
+<span>$39.00</span>
+</div>
+<div class="flex justify-between mb-2">
+<span class="text-gray-600">Delivery Fee</span>
+<span>$2.50</span>
+</div>
+<div class="border-t border-gray-200 my-2"></div>
+<div class="flex justify-between font-bold">
+<span>Total</span>
+<span>$41.50</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-gray-200">
+<button class="w-full bg-primary text-white py-3 rounded-button font-medium hover:bg-gray-800 transition whitespace-nowrap">Place Order</button>
+</div>
+</div>
+</div>
+<style>
+.food-item {
+transition: all 0.3s ease;
+}
+.food-item.hidden-item {
+opacity: 0;
+transform: scale(0.95);
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+const categoryButtons = document.querySelectorAll('.category-btn');
+const foodItems = document.querySelectorAll('.card-shadow');
+foodItems.forEach(item => {
+item.classList.add('food-item');
+const categories = item.getAttribute('data-categories') || 'all';
+item.setAttribute('data-categories', categories);
+});
+function setActiveCategory(selectedCategory) {
+categoryButtons.forEach(button => {
+if (button.getAttribute('data-category') === selectedCategory) {
+button.classList.remove('bg-white', 'text-gray-700', 'border');
+button.classList.add('bg-primary', 'text-white');
+} else {
+button.classList.remove('bg-primary', 'text-white');
+button.classList.add('bg-white', 'text-gray-700', 'border', 'border-gray-200');
+}
+});
+}
+function filterFoodItems(category) {
+foodItems.forEach(item => {
+const itemCategories = item.getAttribute('data-categories').split(',');
+if (category === 'all' || itemCategories.includes(category)) {
+item.classList.remove('hidden-item');
+setTimeout(() => {
+item.style.display = '';
+}, 0);
+} else {
+item.classList.add('hidden-item');
+setTimeout(() => {
+item.style.display = 'none';
+}, 300);
+}
+});
+}
+categoryButtons.forEach(button => {
+button.addEventListener('click', () => {
+const category = button.getAttribute('data-category');
+setActiveCategory(category);
+filterFoodItems(category);
+});
+});
+// Set initial categories for food items
+const foodItemsData = {
+'Eggs Curry': ['breakfast'],
+'Chicken Slice': ['lunch', 'dinner'],
+'Salmon Delight': ['lunch', 'dinner'],
+'Creamy Pasta': ['lunch', 'dinner'],
+'Vegetable Stir Fry': ['lunch', 'dinner'],
+'Classic Burger': ['lunch', 'dinner']
+};
+foodItems.forEach(item => {
+const itemTitle = item.querySelector('h3').textContent;
+const categories = foodItemsData[itemTitle] || ['all'];
+item.setAttribute('data-categories', categories.join(','));
+});
+// Toast notification styles
+const toastStyles = document.createElement('style');
+toastStyles.textContent = `
+.toast {
+position: fixed;
+top: 20px;
+left: 50%;
+transform: translateX(-50%);
+background: rgba(0, 0, 0, 0.8);
+color: white;
+padding: 12px 24px;
+border-radius: 8px;
+z-index: 1000;
+opacity: 0;
+transition: opacity 0.3s ease;
+}
+.toast.show {
+opacity: 1;
+}`;
+document.head.appendChild(toastStyles);
+// Product cards click event
+const productCards = document.querySelectorAll('.card-shadow');
+const productDetailModal = document.getElementById('productDetailModal');
+const closeModal = document.getElementById('closeModal');
+const addToCartBtn = document.getElementById('addToCartBtn');
+const cartCounter = document.querySelector('.ri-shopping-cart-line').nextElementSibling;
+// Create toast element
+const toast = document.createElement('div');
+toast.className = 'toast';
+document.body.appendChild(toast);
+// Show toast function
+function showToast(message) {
+toast.textContent = message;
+toast.classList.add('show');
+setTimeout(() => {
+toast.classList.remove('show');
+}, 2000);
+}
+// Add to cart function
+function addToCart() {
+const currentCount = parseInt(cartCounter.textContent);
+cartCounter.textContent = currentCount + 1;
+showToast('Eggs Curry added to cart');
+}
+productCards.forEach(card => {
+card.addEventListener('click', function() {
+productDetailModal.classList.remove('hidden');
+});
+});
+closeModal.addEventListener('click', function() {
+productDetailModal.classList.add('hidden');
+});
+if (addToCartBtn) {
+addToCartBtn.addEventListener('click', function(e) {
+e.stopPropagation();
+const currentCount = parseInt(cartCounter.textContent);
+cartCounter.textContent = currentCount + 1;
+showToast('Eggs Curry added to cart');
+});
+}
+});
+document.addEventListener('DOMContentLoaded', function() {
+// Cart functionality
+const cartIcon = document.querySelector('.ri-shopping-cart-line');
+const cartPage = document.getElementById('cartPage');
+const closeCart = document.getElementById('closeCart');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const checkoutPage = document.getElementById('checkoutPage');
+const backToCart = document.getElementById('backToCart');
+cartIcon.parentElement.addEventListener('click', function() {
+cartPage.classList.remove('translate-x-full');
+});
+closeCart.addEventListener('click', function() {
+cartPage.classList.add('translate-x-full');
+});
+checkoutBtn.addEventListener('click', function() {
+cartPage.classList.add('translate-x-full');
+checkoutPage.classList.remove('translate-x-full');
+});
+backToCart.addEventListener('click', function() {
+checkoutPage.classList.add('translate-x-full');
+cartPage.classList.remove('translate-x-full');
+});
+});
+</script>
+</body>
+</html>

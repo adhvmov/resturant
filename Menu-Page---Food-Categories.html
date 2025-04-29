@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foodie - Menu</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#1f2937',secondary:'#4b5563'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.card-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.custom-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e5e7eb;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+.custom-checkbox:checked {
+  background-color: #1f2937;
+  border-color: #1f2937;
+}
+.custom-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.custom-range {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  outline: none;
+}
+.custom-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #1f2937;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.custom-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #1f2937;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+.custom-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+.custom-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e5e7eb;
+  transition: .4s;
+  border-radius: 24px;
+}
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .switch-slider {
+  background-color: #1f2937;
+}
+input:checked + .switch-slider:before {
+  transform: translateX(20px);
+}
+.bottom-sheet {
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+}
+.bottom-sheet.active {
+  transform: translateY(0);
+}
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<!-- Top Navigation -->
+<header class="fixed top-0 left-0 right-0 z-50 glass-effect">
+  <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-4">
+      <a href="https://readdy.ai/home/8d615995-4563-4659-9fbd-7e3c977875dc/d78f7815-2879-40e4-95da-d4fb8f0cdf86" data-readdy="true" class="w-10 h-10 flex items-center justify-center">
+        <i class="ri-arrow-left-s-line text-primary ri-lg"></i>
+      </a>
+      <a href="#" class="font-['Pacifico'] text-2xl text-primary">logo</a>
+    </div>
+    <div class="flex items-center gap-6">
+      <div class="relative w-10 h-10 flex items-center justify-center bg-black rounded-full cursor-pointer" id="cartButton">
+        <i class="ri-shopping-cart-line text-white ri-lg"></i>
+        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">3</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="pt-20 pb-24">
+  <!-- Search Bar -->
+  <div class="container mx-auto px-4 mb-6">
+    <div class="flex items-center gap-3">
+      <div class="flex-1 relative">
+        <input type="text" placeholder="Search for food..." class="w-full py-3 pl-10 pr-4 bg-white border-none rounded-lg shadow-sm text-sm">
+        <div class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-gray-400">
+          <i class="ri-search-line"></i>
+        </div>
+      </div>
+      <button id="filterButton" class="w-10 h-10 bg-white rounded-lg shadow-sm flex items-center justify-center !rounded-button">
+        <i class="ri-filter-3-line text-gray-700"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Chips -->
+  <div class="container mx-auto px-4 mb-6">
+    <div class="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
+      <button class="bg-primary text-white px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap">All</button>
+      <button class="bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-200 whitespace-nowrap">$0-$10</button>
+      <button class="bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-200 whitespace-nowrap">$10-$20</button>
+      <button class="bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-200 whitespace-nowrap">Vegetarian</button>
+      <button class="bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-200 whitespace-nowrap">Vegan</button>
+      <button class="bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-200 whitespace-nowrap">4+ Rating</button>
+      <button class="bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border border-gray-200 whitespace-nowrap">&lt;30 mins</button>
+    </div>
+  </div>
+
+  <!-- Breakfast Section -->
+  <div class="container mx-auto px-4 mb-8">
+    <div class="flex justify-between items-center mb-4 cursor-pointer" data-category="breakfast">
+      <h2 class="text-xl font-bold text-gray-800">Breakfast (6)</h2>
+      <div class="w-6 h-6 flex items-center justify-center text-gray-500 category-toggle">
+        <i class="ri-arrow-down-s-line"></i>
+      </div>
+    </div>
+    <div class="category-content" id="breakfast-content">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Breakfast Item 1 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520avocado%2520toast%2520with%2520poached%2520egg%2520on%2520top%2C%2520garnished%2520with%2520microgreens%2520and%2520red%2520pepper%2520flakes%2C%2520served%2520on%2520a%2520wooden%2520board%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=400&height=300&seq=101&orientation=landscape" alt="Avocado Toast" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-line text-gray-500"></i>
+            </button>
+            <div class="absolute top-3 left-3 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Vegetarian</div>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Avocado Toast</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.8</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Sourdough toast with smashed avocado, poached egg, and microgreens.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$12.50</span>
+                <span class="text-xs text-gray-500 ml-2">20 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Breakfast Item 2 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520fluffy%2520pancakes%2520stacked%2520with%2520fresh%2520berries%2520and%2520maple%2520syrup%2520drizzled%2520on%2520top%2C%2520served%2520on%2520a%2520white%2520plate%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=400&height=300&seq=102&orientation=landscape" alt="Berry Pancakes" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-line text-gray-500"></i>
+            </button>
+            <div class="absolute top-3 left-3 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Vegetarian</div>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Berry Pancakes</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.6</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Fluffy pancakes with fresh berries and pure maple syrup.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$14.00</span>
+                <span class="text-xs text-gray-500 ml-2">15 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Breakfast Item 3 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520eggs%2520benedict%2520with%2520hollandaise%2520sauce%2520and%2520canadian%2520bacon%2520on%2520english%2520muffin%2C%2520garnished%2520with%2520chives%2C%2520served%2520on%2520a%2520blue%2520plate%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=400&height=300&seq=103&orientation=landscape" alt="Eggs Benedict" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-line text-gray-500"></i>
+            </button>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Eggs Benedict</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.9</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">English muffin with poached eggs, Canadian bacon, and hollandaise sauce.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$16.50</span>
+                <span class="text-xs text-gray-500 ml-2">25 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lunch Section -->
+  <div class="container mx-auto px-4 mb-8">
+    <div class="flex justify-between items-center mb-4 cursor-pointer" data-category="lunch">
+      <h2 class="text-xl font-bold text-gray-800">Lunch (8)</h2>
+      <div class="w-6 h-6 flex items-center justify-center text-gray-500 category-toggle">
+        <i class="ri-arrow-down-s-line"></i>
+      </div>
+    </div>
+    <div class="category-content" id="lunch-content">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Lunch Item 1 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520chicken%2520caesar%2520salad%2520with%2520grilled%2520chicken%2520breast%2C%2520romaine%2520lettuce%2C%2520croutons%2C%2520and%2520parmesan%2520cheese%2C%2520served%2520in%2520a%2520white%2520bowl%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=400&height=300&seq=104&orientation=landscape" alt="Chicken Caesar Salad" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-line text-gray-500"></i>
+            </button>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Chicken Caesar</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.5</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Grilled chicken with romaine lettuce, croutons, and Caesar dressing.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$15.75</span>
+                <span class="text-xs text-gray-500 ml-2">15 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Lunch Item 2 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520classic%2520burger%2520with%2520beef%2520patty%2C%2520lettuce%2C%2520tomato%2C%2520cheese%2C%2520and%2520special%2520sauce%2C%2520served%2520with%2520french%2520fries%2520on%2520the%2520side%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=400&height=300&seq=105&orientation=landscape" alt="Classic Burger" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-fill text-red-500"></i>
+            </button>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Classic Burger</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.7</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Beef patty with lettuce, tomato, cheese, and special sauce.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$13.50</span>
+                <span class="text-xs text-gray-500 ml-2">20 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Lunch Item 3 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520vegetable%2520stir%2520fry%2520with%2520colorful%2520bell%2520peppers%2C%2520broccoli%2C%2520carrots%2C%2520and%2520tofu%2520in%2520a%2520dark%2520bowl%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation%2C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=400&height=300&seq=106&orientation=landscape" alt="Vegetable Stir Fry" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-line text-gray-500"></i>
+            </button>
+            <div class="absolute top-3 left-3 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Vegan</div>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Vegetable Stir Fry</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.4</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Fresh seasonal vegetables stir-fried with tofu and special sauce.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$11.25</span>
+                <span class="text-xs text-gray-500 ml-2">15 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dinner Section -->
+  <div class="container mx-auto px-4 mb-8">
+    <div class="flex justify-between items-center mb-4 cursor-pointer" data-category="dinner">
+      <h2 class="text-xl font-bold text-gray-800">Dinner (10)</h2>
+      <div class="w-6 h-6 flex items-center justify-center text-gray-500 category-toggle">
+        <i class="ri-arrow-down-s-line"></i>
+      </div>
+    </div>
+    <div class="category-content" id="dinner-content">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dinner Item 1 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520grilled%2520salmon%2520fillet%2520with%2520asparagus%2C%2520lemon%2520wedges%2C%2520and%2520herb%2520butter%2C%2520served%2520on%2520a%2520black%2520plate%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=400&height=300&seq=107&orientation=landscape" alt="Grilled Salmon" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-line text-gray-500"></i>
+            </button>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Grilled Salmon</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.9</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Atlantic salmon with asparagus, lemon, and herb butter.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$22.50</span>
+                <span class="text-xs text-gray-500 ml-2">25 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Dinner Item 2 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520ribeye%2520steak%2520with%2520roasted%2520potatoes%2520and%2520grilled%2520vegetables%2C%2520served%2520on%2520a%2520wooden%2520board%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=400&height=300&seq=108&orientation=landscape" alt="Ribeye Steak" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-line text-gray-500"></i>
+            </button>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Ribeye Steak</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.8</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Prime ribeye with roasted potatoes and grilled vegetables.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$28.00</span>
+                <span class="text-xs text-gray-500 ml-2">30 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Dinner Item 3 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520mushroom%2520risotto%2520with%2520parmesan%2520cheese%2520and%2520fresh%2520herbs%2C%2520served%2520in%2520a%2520white%2520bowl%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation%2C%2520appetizing%2520and%2520mouthwatering%2520appearance&width=400&height=300&seq=109&orientation=landscape" alt="Mushroom Risotto" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-line text-gray-500"></i>
+            </button>
+            <div class="absolute top-3 left-3 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Vegetarian</div>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Mushroom Risotto</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.6</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Creamy arborio rice with wild mushrooms and parmesan cheese.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$18.75</span>
+                <span class="text-xs text-gray-500 ml-2">25 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desserts Section -->
+  <div class="container mx-auto px-4 mb-8">
+    <div class="flex justify-between items-center mb-4 cursor-pointer" data-category="desserts">
+      <h2 class="text-xl font-bold text-gray-800">Desserts (5)</h2>
+      <div class="w-6 h-6 flex items-center justify-center text-gray-500 category-toggle">
+        <i class="ri-arrow-down-s-line"></i>
+      </div>
+    </div>
+    <div class="category-content" id="desserts-content">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dessert Item 1 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520chocolate%2520lava%2520cake%2520with%2520vanilla%2520ice%2520cream%2520and%2520fresh%2520berries%2C%2520chocolate%2520sauce%2520drizzled%2520on%2520top%2C%2520served%2520on%2520a%2520white%2520plate%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=400&height=300&seq=110&orientation=landscape" alt="Chocolate Lava Cake" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-fill text-red-500"></i>
+            </button>
+            <div class="absolute top-3 left-3 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Vegetarian</div>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Chocolate Lava Cake</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.9</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Warm chocolate cake with molten center and vanilla ice cream.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$9.50</span>
+                <span class="text-xs text-gray-500 ml-2">15 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Dessert Item 2 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520New%2520York%2520cheesecake%2520with%2520fresh%2520strawberry%2520topping%2C%2520served%2520on%2520a%2520white%2520plate%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=400&height=300&seq=111&orientation=landscape" alt="New York Cheesecake" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-line text-gray-500"></i>
+            </button>
+            <div class="absolute top-3 left-3 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Vegetarian</div>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">NY Cheesecake</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.7</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Creamy New York style cheesecake with fresh strawberry topping.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$8.75</span>
+                <span class="text-xs text-gray-500 ml-2">10 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drinks Section -->
+  <div class="container mx-auto px-4 mb-8">
+    <div class="flex justify-between items-center mb-4 cursor-pointer" data-category="drinks">
+      <h2 class="text-xl font-bold text-gray-800">Drinks (7)</h2>
+      <div class="w-6 h-6 flex items-center justify-center text-gray-500 category-toggle">
+        <i class="ri-arrow-down-s-line"></i>
+      </div>
+    </div>
+    <div class="category-content" id="drinks-content">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Drink Item 1 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520fresh%2520fruit%2520smoothie%2520in%2520a%2520tall%2520glass%2520with%2520berries%2520and%2520mint%2520garnish%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=400&height=300&seq=112&orientation=landscape" alt="Berry Smoothie" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-line text-gray-500"></i>
+            </button>
+            <div class="absolute top-3 left-3 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Vegan</div>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Berry Smoothie</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.6</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Fresh mixed berries blended with almond milk and honey.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$7.50</span>
+                <span class="text-xs text-gray-500 ml-2">5 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Drink Item 2 -->
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+          <div class="relative">
+            <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520an%2520iced%2520latte%2520with%2520latte%2520art%2520in%2520a%2520clear%2520glass%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520cafe%2520quality%2520presentation&width=400&height=300&seq=113&orientation=landscape" alt="Iced Latte" class="w-full h-48 object-cover object-top">
+            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <i class="ri-heart-line text-gray-500"></i>
+            </button>
+            <div class="absolute top-3 left-3 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Vegetarian</div>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between">
+              <h3 class="text-lg font-bold text-gray-800">Iced Latte</h3>
+              <div class="flex items-center">
+                <i class="ri-star-fill text-yellow-400 text-sm mr-1"></i>
+                <span class="text-sm font-medium">4.5</span>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Espresso with cold milk over ice, available with alternative milks.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-lg font-bold text-gray-800">$5.25</span>
+                <span class="text-xs text-gray-500 ml-2">5 mins</span>
+              </div>
+              <button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center !rounded-button">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-around items-center py-3">
+      <a href="Restaurant-Online-Shop.html" data-readdy="true" class="flex flex-col items-center">
+        <div class="w-6 h-6 flex items-center justify-center text-gray-500">
+          <i class="ri-home-5-line ri-lg"></i>
+        </div>
+        <span class="text-xs text-gray-500 font-medium mt-1">Home</span>
+      </a>
+      <a href="Menu-Page---Food-Categories.html" data-readdy="true" class="flex flex-col items-center">
+        <div class="w-6 h-6 flex items-center justify-center text-primary">
+          <i class="ri-restaurant-fill ri-lg"></i>
+        </div>
+        <span class="text-xs text-primary font-medium mt-1">Menu</span>
+      </a>
+      <a href="Order-History-and-Tracking.html" data-readdy="true" class="flex flex-col items-center">
+        <div class="w-6 h-6 flex items-center justify-center text-gray-500">
+          <i class="ri-shopping-bag-line ri-lg"></i>
+        </div>
+        <span class="text-xs text-gray-500 font-medium mt-1">Orders</span>
+      </a>
+      <a href="#" class="flex flex-col items-center">
+        <div class="w-6 h-6 flex items-center justify-center text-gray-500">
+          <i class="ri-user-line ri-lg"></i>
+        </div>
+        <span class="text-xs text-gray-500 font-medium mt-1">Profile</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Filter Bottom Sheet -->
+<div id="filterBottomSheet" class="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-lg bottom-sheet">
+  <div class="p-4 border-b border-gray-200">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-bold text-gray-800">Filters</h2>
+      <button id="closeFilterSheet" class="w-8 h-8 flex items-center justify-center text-gray-500">
+        <i class="ri-close-line ri-lg"></i>
+      </button>
+    </div>
+  </div>
+  <div class="p-6 overflow-y-auto max-h-[70vh]">
+    <!-- Price Range -->
+    <div class="mb-6">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">Price Range</h3>
+      <div class="mb-2 flex justify-between">
+        <span class="text-sm text-gray-600">$0</span>
+        <span class="text-sm text-gray-600">$50</span>
+      </div>
+      <input type="range" min="0" max="50" value="25" class="custom-range" id="priceRange">
+      <div class="mt-2">
+        <p class="text-sm text-gray-700">Selected: $<span id="priceValue">25</span></p>
+      </div>
+    </div>
+    
+    <!-- Dietary Preferences -->
+    <div class="mb-6">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">Dietary Preferences</h3>
+      <div class="space-y-3">
+        <div class="flex items-center">
+          <input type="checkbox" id="vegetarian" class="custom-checkbox">
+          <label for="vegetarian" class="ml-3 text-gray-700">Vegetarian</label>
+        </div>
+        <div class="flex items-center">
+          <input type="checkbox" id="vegan" class="custom-checkbox">
+          <label for="vegan" class="ml-3 text-gray-700">Vegan</label>
+        </div>
+        <div class="flex items-center">
+          <input type="checkbox" id="glutenFree" class="custom-checkbox">
+          <label for="glutenFree" class="ml-3 text-gray-700">Gluten Free</label>
+        </div>
+        <div class="flex items-center">
+          <input type="checkbox" id="dairyFree" class="custom-checkbox">
+          <label for="dairyFree" class="ml-3 text-gray-700">Dairy Free</label>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Rating -->
+    <div class="mb-6">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">Minimum Rating</h3>
+      <div class="flex items-center space-x-4">
+        <button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
+          <span>4+</span>
+        </button>
+        <button class="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center">
+          <span>3+</span>
+        </button>
+        <button class="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center">
+          <span>2+</span>
+        </button>
+        <button class="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center">
+          <span>1+</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Cooking Time -->
+    <div class="mb-6">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">Cooking Time</h3>
+      <div class="space-y-3">
+        <div class="flex items-center">
+          <input type="radio" name="cookingTime" id="under15" class="custom-checkbox">
+          <label for="under15" class="ml-3 text-gray-700">Under 15 minutes</label>
+        </div>
+        <div class="flex items-center">
+          <input type="radio" name="cookingTime" id="under30" checked class="custom-checkbox">
+          <label for="under30" class="ml-3 text-gray-700">Under 30 minutes</label>
+        </div>
+        <div class="flex items-center">
+          <input type="radio" name="cookingTime" id="under45" class="custom-checkbox">
+          <label for="under45" class="ml-3 text-gray-700">Under 45 minutes</label>
+        </div>
+        <div class="flex items-center">
+          <input type="radio" name="cookingTime" id="any" class="custom-checkbox">
+          <label for="any" class="ml-3 text-gray-700">Any time</label>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sort By -->
+    <div class="mb-6">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">Sort By</h3>
+      <div class="space-y-3">
+        <div class="flex items-center">
+          <input type="radio" name="sortBy" id="popular" checked class="custom-checkbox">
+          <label for="popular" class="ml-3 text-gray-700">Most Popular</label>
+        </div>
+        <div class="flex items-center">
+          <input type="radio" name="sortBy" id="priceAsc" class="custom-checkbox">
+          <label for="priceAsc" class="ml-3 text-gray-700">Price: Low to High</label>
+        </div>
+        <div class="flex items-center">
+          <input type="radio" name="sortBy" id="priceDesc" class="custom-checkbox">
+          <label for="priceDesc" class="ml-3 text-gray-700">Price: High to Low</label>
+        </div>
+        <div class="flex items-center">
+          <input type="radio" name="sortBy" id="rating" class="custom-checkbox">
+          <label for="rating" class="ml-3 text-gray-700">Highest Rated</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="p-4 border-t border-gray-200 flex gap-4">
+    <button class="flex-1 py-3 border border-gray-300 rounded-button font-medium text-gray-700 whitespace-nowrap">Reset</button>
+    <button class="flex-1 py-3 bg-primary text-white rounded-button font-medium whitespace-nowrap">Apply Filters</button>
+  </div>
+</div>
+
+<!-- Cart Page (Initially Hidden) -->
+<div id="cartPage" class="fixed inset-0 z-50 bg-white transform translate-x-full transition-transform duration-300">
+  <div class="flex flex-col h-full">
+    <div class="p-4 border-b border-gray-200 flex items-center">
+      <button id="closeCart" class="w-10 h-10 flex items-center justify-center">
+        <i class="ri-arrow-left-s-line text-gray-800 ri-lg"></i>
+      </button>
+      <h2 class="text-xl font-bold text-gray-800 ml-4">Your Cart</h2>
+    </div>
+    <div class="flex-grow overflow-auto p-4">
+      <!-- Cart Item 1 -->
+      <div class="flex items-center py-4 border-b border-gray-100">
+        <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520classic%2520burger%2520with%2520beef%2520patty%2C%2520lettuce%2C%2520tomato%2C%2520cheese%2C%2520and%2520special%2520sauce%2C%2520served%2520with%2520french%2520fries%2520on%2520the%2520side%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=100&height=100&seq=114&orientation=squarish" alt="Classic Burger" class="w-20 h-20 object-cover rounded-lg object-top">
+        <div class="ml-4 flex-grow">
+          <h3 class="font-medium text-gray-800">Classic Burger</h3>
+          <p class="text-sm text-gray-500">$13.50</p>
+        </div>
+        <div class="flex items-center border border-gray-200 rounded-lg">
+          <button class="w-8 h-8 flex items-center justify-center text-gray-500">
+            <i class="ri-subtract-line"></i>
+          </button>
+          <span class="w-8 text-center">1</span>
+          <button class="w-8 h-8 flex items-center justify-center text-gray-500">
+            <i class="ri-add-line"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Cart Item 2 -->
+      <div class="flex items-center py-4 border-b border-gray-100">
+        <img src="https://readdy.ai/api/search-image?query=Professional%2520food%2520photography%2520of%2520a%2520chocolate%2520lava%2520cake%2520with%2520vanilla%2520ice%2520cream%2520and%2520fresh%2520berries%2C%2520chocolate%2520sauce%2520drizzled%2520on%2520top%2C%2520served%2520on%2520a%2520white%2520plate%2C%2520soft%2520natural%2520lighting%2C%2520shallow%2520depth%2520of%2520field%2C%2520high-end%2520restaurant%2520quality%2520presentation&width=100&height=100&seq=115&orientation=squarish" alt="Chocolate Lava Cake" class="w-20 h-20 object-cover rounded-lg object-top">
+        <div class="ml-4 flex-grow">
+          <h3 class="font-medium text-gray-800">Chocolate Lava Cake</h3>
+          <p class="text-sm text-gray-500">$9.50</p>
+        </div>
+        <div class="flex items-center border border-gray-200 rounded-lg">
+          <button class="w-8 h-8 flex items-center justify-center text-gray-500">
+            <i class="ri-subtract-line"></i>
+          </button>
+          <span class="w-8 text-center">2</span>
+          <button class="w-8 h-8 flex items-center justify-center text-gray-500">
+            <i class="ri-add-line"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="p-4 border-t border-gray-200">
+      <div class="flex justify-between mb-2">
+        <span class="text-gray-600">Subtotal</span>
+        <span class="font-medium">$32.50</span>
+      </div>
+      <div class="flex justify-between mb-2">
+        <span class="text-gray-600">Delivery Fee</span>
+        <span class="font-medium">$2.50</span>
+      </div>
+      <div class="flex justify-between mb-4">
+        <span class="text-gray-800 font-bold">Total</span>
+        <span class="text-gray-800 font-bold">$35.00</span>
+      </div>
+      <button id="checkoutBtn" class="w-full bg-primary text-white py-3 rounded-button font-medium hover:bg-gray-800 transition whitespace-nowrap">Proceed to Checkout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Category toggle functionality
+  const categoryToggles = document.querySelectorAll('[data-category]');
+  categoryToggles.forEach(toggle => {
+    toggle.addEventListener('click', function() {
+      const category = this.getAttribute('data-category');
+      const content = document.getElementById(`${category}-content`);
+      const icon = this.querySelector('.category-toggle i');
+      
+      if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.className = 'ri-arrow-down-s-line';
+      } else {
+        content.style.display = 'none';
+        icon.className = 'ri-arrow-right-s-line';
+      }
+    });
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Filter bottom sheet functionality
+  const filterButton = document.getElementById('filterButton');
+  const filterBottomSheet = document.getElementById('filterBottomSheet');
+  const closeFilterSheet = document.getElementById('closeFilterSheet');
+  
+  filterButton.addEventListener('click', function() {
+    filterBottomSheet.classList.add('active');
+  });
+  
+  closeFilterSheet.addEventListener('click', function() {
+    filterBottomSheet.classList.remove('active');
+  });
+  
+  // Price range slider
+  const priceRange = document.getElementById('priceRange');
+  const priceValue = document.getElementById('priceValue');
+  
+  priceRange.addEventListener('input', function() {
+    priceValue.textContent = this.value;
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Cart functionality
+  const cartButton = document.getElementById('cartButton');
+  const cartPage = document.getElementById('cartPage');
+  const closeCart = document.getElementById('closeCart');
+  
+  cartButton.addEventListener('click', function() {
+    cartPage.classList.remove('translate-x-full');
+  });
+  
+  closeCart.addEventListener('click', function() {
+    cartPage.classList.add('translate-x-full');
+  });
+});
+</script>
+</body>
+</html>
